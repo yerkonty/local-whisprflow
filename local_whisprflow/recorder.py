@@ -37,12 +37,24 @@ class AudioRecorder:
             callback=self._callback,
         )
         self._stream.start()
-        self._timer = threading.Timer(self.max_seconds, self.stop)
+        self._timer = threading.Timer(self.max_seconds, self._auto_stop)
         self._timer.daemon = True
         self._timer.start()
 
     def _callback(self, indata, frames, time_info, status):
         self._frames.append(indata.copy())
+
+    def _auto_stop(self) -> None:
+        """Timer callback: stop capturing at the hard cap, but leave the
+        buffered frames available for the next explicit stop() call
+        (mirrors the user eventually releasing the hotkey)."""
+        if not self._is_recording:
+            return
+        if self._stream is not None:
+            self._stream.stop()
+            self._stream.close()
+            self._stream = None
+        self._timer = None
 
     def stop(self) -> np.ndarray:
         if not self._is_recording:
@@ -51,9 +63,10 @@ class AudioRecorder:
         if self._timer is not None:
             self._timer.cancel()
             self._timer = None
-        self._stream.stop()
-        self._stream.close()
-        self._stream = None
+        if self._stream is not None:
+            self._stream.stop()
+            self._stream.close()
+            self._stream = None
         if self._frames:
             audio = np.concatenate(self._frames, axis=0).flatten()
         else:

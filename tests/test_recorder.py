@@ -43,3 +43,23 @@ def test_start_is_idempotent_while_already_recording():
         recorder.start()
 
         mock_stream_cls.assert_called_once()
+
+
+def test_auto_stop_preserves_frames_for_later_stop_call():
+    with patch("local_whisprflow.recorder.sd.InputStream") as mock_stream_cls:
+        mock_stream = MagicMock()
+        mock_stream_cls.return_value = mock_stream
+
+        recorder = AudioRecorder(sample_rate=16000, channels=1, max_seconds=60)
+        recorder.start()
+        recorder._callback(np.array([[0.4], [0.5]], dtype="float32"), 2, None, None)
+
+        recorder._auto_stop()  # simulate the 60s timer firing
+        assert recorder.is_recording is True  # still "recording" until real stop()
+
+        audio = recorder.stop()  # simulate the user finally releasing the key
+
+        assert audio.shape == (2,)
+        np.testing.assert_allclose(audio, [0.4, 0.5], atol=1e-6)
+        mock_stream.stop.assert_called_once()   # stopped once, by _auto_stop
+        mock_stream.close.assert_called_once()  # not double-stopped by stop()
