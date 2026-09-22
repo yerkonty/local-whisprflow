@@ -49,3 +49,16 @@ def test_insert_text_tolerates_clipboard_read_failure():
 
         mock_pyperclip.copy.assert_any_call("hello")
         mock_keyboard.send.assert_called_once_with("ctrl+v")
+
+
+def test_insert_text_logs_warning_when_restore_fails(caplog):
+    with patch("local_whisprflow.injector.pyperclip") as mock_pyperclip, \
+         patch("local_whisprflow.injector.keyboard") as mock_keyboard, \
+         patch("local_whisprflow.injector.time.sleep"):
+        mock_pyperclip.paste.return_value = "old"
+        mock_pyperclip.copy.side_effect = [None, Exception("clipboard locked")]
+
+        with caplog.at_level("WARNING"):
+            insert_text("hello")
+
+        assert "restore" in caplog.text.lower()

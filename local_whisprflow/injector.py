@@ -1,9 +1,12 @@
+import logging
 import time
 
 import keyboard
 import pyperclip
 
 from . import config
+
+logger = logging.getLogger(__name__)
 
 
 def insert_text(text: str) -> None:
@@ -24,4 +27,4 @@ def insert_text(text: str) -> None:
         try:
             pyperclip.copy(previous_clipboard)
         except Exception:
-            pass
+            logger.warning("Failed to restore clipboard contents after paste")
