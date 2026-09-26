@@ -32,8 +32,10 @@ class TrayIcon:
         self._icon.icon = self._icon_images[state]
 
     def _handle_quit(self, icon, item) -> None:
-        self._on_quit()
-        icon.stop()
+        try:
+            self._on_quit()
+        finally:
+            icon.stop()
 
     def run(self) -> None:
         self._icon.run()

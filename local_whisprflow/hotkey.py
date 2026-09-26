@@ -16,19 +16,29 @@ class PushToTalkHotkey:
 
     def stop(self) -> None:
         if self._press_handle is not None:
-            keyboard.unhook(self._press_handle)
+            try:
+                keyboard.unhook(self._press_handle)
+            except KeyError:
+                pass
             self._press_handle = None
         if self._release_handle is not None:
-            keyboard.unhook(self._release_handle)
+            try:
+                keyboard.unhook(self._release_handle)
+            except KeyError:
+                pass
             self._release_handle = None
 
     def _handle_press(self, event) -> None:
+        if event is not None and getattr(event, "name", self._key) != self._key:
+            return
         if self._pressed:
             return
         self._pressed = True
         self._on_press()
 
     def _handle_release(self, event) -> None:
+        if event is not None and getattr(event, "name", self._key) != self._key:
+            return
         if not self._pressed:
             return
         self._pressed = False

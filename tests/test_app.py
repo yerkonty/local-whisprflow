@@ -78,12 +78,21 @@ def test_release_returns_tray_to_idle_even_if_insert_text_raises():
     app, _, transcriber, insert_text_fn = _make_app(duration_seconds=1.0, transcribed_text="hello")
     insert_text_fn.side_effect = RuntimeError("paste failed")
 
-    try:
-        app._on_release()
-    except RuntimeError:
-        pass
+    app._on_release()  # must not raise anymore
 
     app._tray.set_state.assert_called_with("idle")
+    app._tray.notify.assert_called_once()
+
+
+def test_release_notifies_and_returns_to_idle_if_transcribe_raises():
+    app, _, transcriber, insert_text_fn = _make_app(duration_seconds=1.0, transcribed_text="hello")
+    transcriber.transcribe.side_effect = RuntimeError("model crashed")
+
+    app._on_release()  # must not raise
+
+    insert_text_fn.assert_not_called()
+    app._tray.set_state.assert_called_with("idle")
+    app._tray.notify.assert_called_once()
 
 
 def test_quit_stops_hotkey():

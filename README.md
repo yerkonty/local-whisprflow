@@ -3,7 +3,9 @@
 A free, fully local voice-dictation tool for Windows. Hold Right Ctrl,
 speak, release — the transcribed text is typed into whatever application
 currently has focus. Runs entirely offline using `faster-whisper`; no
-cloud calls, no subscription.
+cloud calls, no subscription. Note: the very first run downloads the
+`base.en` speech model (~150 MB) from Hugging Face, so it needs an
+internet connection once — after that, everything runs fully offline.
 
 ## Setup
 
@@ -34,7 +36,8 @@ it does **not** start automatically when Windows boots.
 - The recognized text is inserted at the cursor in whatever window has
   focus (Notepad, browser, VS Code, etc.).
 - Very short taps (under 0.3s) are ignored.
-- Recording auto-stops after 60 seconds if you forget to release the key.
+- Recording capture stops after 60 seconds if you forget to release the
+  key — release it afterward to transcribe what was captured (up to 60s).
 - Right-click the tray icon and choose **Quit** to close the app.
 
 ## Running tests

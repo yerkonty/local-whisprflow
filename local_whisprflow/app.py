@@ -1,9 +1,13 @@
+import logging
+
 from . import config
 from .hotkey import PushToTalkHotkey
 from .injector import insert_text
 from .recorder import AudioRecorder
 from .stt import Transcriber
 from .tray import TrayIcon
+
+logger = logging.getLogger(__name__)
 
 
 class App:
@@ -43,6 +47,9 @@ class App:
             text = self._transcriber.transcribe(audio)
             if text:
                 self._insert_text(text)
+        except Exception as exc:
+            logger.exception("Transcription or text insertion failed")
+            self._tray.notify(f"Transcription/paste failed: {exc}")
         finally:
             self._tray.set_state("idle")
 

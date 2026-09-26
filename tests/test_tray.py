@@ -41,6 +41,20 @@ def test_quit_calls_on_quit_and_stops_icon():
         patcher.stop()
 
 
+def test_quit_stops_icon_even_if_on_quit_raises():
+    patcher, _, mock_icon = _patched_pystray()
+    try:
+        on_quit = MagicMock(side_effect=RuntimeError("boom"))
+        tray = TrayIcon(on_quit=on_quit)
+        try:
+            tray._handle_quit(mock_icon, None)
+        except RuntimeError:
+            pass
+        mock_icon.stop.assert_called_once()
+    finally:
+        patcher.stop()
+
+
 def test_run_delegates_to_pystray_icon():
     patcher, _, mock_icon = _patched_pystray()
     try:
