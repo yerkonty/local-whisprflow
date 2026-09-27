@@ -17,7 +17,7 @@ internet connection once — after that, everything runs fully offline.
    ```
 3. Install dependencies:
    ```
-   pip install -r requirements.txt
+   pip install -e ".[dev]"
    ```
 4. Run once from the terminal to confirm it works:
    ```
